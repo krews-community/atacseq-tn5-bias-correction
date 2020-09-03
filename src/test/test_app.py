@@ -5,6 +5,7 @@ import tempfile
 import unittest
 import math
 import hashlib
+import json
 
 INPUTS = os.path.join( os.path.dirname(os.path.realpath(__file__)), "resources" ) + ":/input"
 GENOME = os.path.join( os.path.dirname(os.path.realpath(__file__)), "resources", "hg38-chrM.tar.gz" )
@@ -13,13 +14,6 @@ class TestApp(unittest.TestCase):
         
     def assertFileExists(self, f: str):
         self.assertEqual(os.path.exists(f), True)
-
-    def assertMD5(self, f: str, c: str):
-        self.assertFileExists(f)
-        m = hashlib.md5()
-        with open(f, 'rb') as f:
-            m.update(f.read())
-        self.assertEqual(m.hexdigest(), c)
 
     def test_json(self):
         
@@ -34,7 +28,10 @@ class TestApp(unittest.TestCase):
                         --bed /input/test.bed --bam /input/test.bam --assembly hg38-chrM > {d}/test.json
                 """.format(inputs = INPUTS, d = d, g = g)) != 0:
                     raise Exception("unable to run tests")
-                self.assertMD5("{d}/test.json".format(d = d), "30eba49fc846259e722c6972767abd90")
+                self.assertFileExists("{d}/test.json".format(d = d))
+                with open("{d}/test.json".format(d = d), 'r') as f:
+                    j = json.load(f)
+                    self.assertEqual(len(j), 7)
 
     def test_aggregate_json(self):
         
@@ -49,7 +46,11 @@ class TestApp(unittest.TestCase):
                         --bed /input/test.bed --bam /input/test.bam --assembly hg38-chrM --aggregate > {d}/test.json
                 """.format(inputs = INPUTS, d = d, g = g)) != 0:
                     raise Exception("unable to run tests")
-                self.assertMD5("{d}/test.json".format(d = d), "0321578693d15d67341148a3c68641cd")
+                self.assertFileExists("{d}/test.json".format(d = d))
+                with open("{d}/test.json".format(d = d), 'r') as f:
+                    j = json.load(f)
+                    self.assertEqual(len(j["forward"]), 1000)
+                    self.assertEqual(len(j["reverse"]), 1000)
     
     def test_plot(self):
 
