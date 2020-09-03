@@ -30,11 +30,11 @@ class TestApp(unittest.TestCase):
 
             with tempfile.TemporaryDirectory() as d:
                 if os.system("""
-                    docker run -it --volume {inputs} --volume {g}:/root/rgtdata/hg38-chrM test python3 -m app.main \
+                    docker run --volume {inputs} --volume {g}:/root/rgtdata/hg38-chrM test python3 -m app.main \
                         --bed /input/test.bed --bam /input/test.bam --assembly hg38-chrM > {d}/test.json
                 """.format(inputs = INPUTS, d = d, g = g)) != 0:
                     raise Exception("unable to run tests")
-                self.assertMD5("{d}/test.json".format(d = d), "0cc85b9cc3028ab7ff80e74298a0b354")
+                self.assertMD5("{d}/test.json".format(d = d), "30eba49fc846259e722c6972767abd90")
 
     def test_aggregate_json(self):
         
@@ -45,11 +45,11 @@ class TestApp(unittest.TestCase):
 
             with tempfile.TemporaryDirectory() as d:
                 if os.system("""
-                    docker run -it --volume {inputs} --volume {g}:/root/rgtdata/hg38-chrM test python3 -m app.main \
+                    docker run --volume {inputs} --volume {g}:/root/rgtdata/hg38-chrM test python3 -m app.main \
                         --bed /input/test.bed --bam /input/test.bam --assembly hg38-chrM --aggregate > {d}/test.json
                 """.format(inputs = INPUTS, d = d, g = g)) != 0:
                     raise Exception("unable to run tests")
-                self.assertMD5("{d}/test.json".format(d = d), "f6781de58ab33dfacc7bce0c8bf9d178")
+                self.assertMD5("{d}/test.json".format(d = d), "0321578693d15d67341148a3c68641cd")
     
     def test_plot(self):
 
@@ -60,7 +60,7 @@ class TestApp(unittest.TestCase):
 
             with tempfile.TemporaryDirectory() as d:
                 if os.system("""
-                    docker run -it --volume {inputs} --volume {g}:/root/rgtdata/hg38-chrM --volume {d}:/output test python3 -m app.main \
+                    docker run --volume {inputs} --volume {g}:/root/rgtdata/hg38-chrM --volume {d}:/output test python3 -m app.main \
                         --bed /input/test.bed --bam /input/test.bam --assembly hg38-chrM --plot-output /output/test.svg > /dev/null
                 """.format(inputs = INPUTS, d = d, g = g)) != 0:
                     raise Exception("unable to run tests")
