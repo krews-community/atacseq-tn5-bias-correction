@@ -13,7 +13,7 @@ class FilteredRegions:
         with open(self.path, 'r') as f:
             for line in f:
                 if float(line.strip().split()[-1]) < self.threshold:
-                    self.tempfile.write('\t'.join(line.strip().split()[1:5]) + '\n')
+                    self.tempfile.write('\t'.join(line.strip().split()[1:4]) + '\t' + line.strip().split()[0] + '\n')
         self.tempfile.flush()
         return self.tempfile
     

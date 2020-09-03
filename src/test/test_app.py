@@ -49,8 +49,8 @@ class TestApp(unittest.TestCase):
                 self.assertFileExists("{d}/test.json".format(d = d))
                 with open("{d}/test.json".format(d = d), 'r') as f:
                     j = json.load(f)
-                    self.assertEqual(len(j["forward"]), 1000)
-                    self.assertEqual(len(j["reverse"]), 1000)
+                    self.assertEqual(len(j["all"]["forward"]), 1000)
+                    self.assertEqual(len(j["all"]["reverse"]), 1000)
     
     def test_plot(self):
 
@@ -77,10 +77,16 @@ class TestApp(unittest.TestCase):
             with tempfile.TemporaryDirectory() as d:
                 if os.system("""
                     docker run --volume {inputs} --volume {g}:/root/rgtdata/hg38-chrM test python3 -m app.main \
-                        --bed /input/test.occ.bed --bam /input/test.bam --assembly hg38-chrM --occurrence-threshold 1e-5 > {d}/test.json
+                        --bed /input/test.occ.bed --bam /input/test.bam --assembly hg38-chrM --aggregate --occurrence-threshold 1e-5 > {d}/test.json
                 """.format(inputs = INPUTS, d = d, g = g)) != 0:
                     raise Exception("unable to run tests")
                 self.assertFileExists("{d}/test.json".format(d = d))
                 with open("{d}/test.json".format(d = d), 'r') as f:
                     j = json.load(f)
                     self.assertEqual(len(j), 3)
+                    self.assertEqual(len(j["WTTTCTCTCWGTGYA"]["forward"]), 1000)
+                    self.assertEqual(len(j["WTTTCTCTCWGTGYA"]["reverse"]), 1000)
+                    self.assertEqual(len(j["ATTTCTCTCWGTGYA"]["forward"]), 1000)
+                    self.assertEqual(len(j["ATTTCTCTCWGTGYA"]["reverse"]), 1000)
+                    self.assertEqual(len(j["all"]["forward"]), 1000)
+                    self.assertEqual(len(j["all"]["reverse"]), 1000)

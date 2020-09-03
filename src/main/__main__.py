@@ -22,6 +22,23 @@ def args():
     parser.add_argument("--occurrence-threshold", type = float, help = "specificies that the given BED file contains FIMO occurrences which should be filtered at this q-value.", default = None)
     return parser.parse_args()
 
+def aggregate(signal, key = lambda x: "all", ext_size = 500):
+    forward = lambda key: [ 0 for _ in range(ext_size * 2) ]
+    reverse = lambda key: [ 0 for _ in range(ext_size * 2) ]
+    results = { "all": { "forward": forward("all"), "reverse": reverse("all") } }
+    for x in signal:
+        k = key(x)
+        if k not in results: results[k] = { "forward": forward(k), "reverse": reverse(k) }
+        if x["forward"] is not None:
+            for i, xx in enumerate(x["forward"]):
+                results[k]["forward"][i] += xx
+                if k != "all": results["all"]["forward"][i] += xx
+        if x["reverse"] is not None:
+            for i, xx in enumerate(x["reverse"]):
+                results[k]["reverse"][i] += xx
+                if k != "all": results["all"]["reverse"][i] += xx
+    return results
+
 def main():
 
     cArgs = args()
@@ -47,18 +64,9 @@ def main():
             signal = footprint(cArgs.bam, b.name, cArgs.assembly)
 
     if cArgs.aggregate or cArgs.plot_output is not None:
-
-        forward = [ 0 for _ in range(cArgs.ext_size * 2) ]
-        reverse = [ 0 for _ in range(cArgs.ext_size * 2) ]
-        for x in signal:
-            if x["forward"] is not None:
-                for i, xx in enumerate(x["forward"]): forward[i] += xx
-            if x["reverse"] is not None:
-                for i, xx in enumerate(x["reverse"]): reverse[i] += xx
-        if cArgs.aggregate: signal = { "forward": forward, "reverse": reverse }
-
+        signal = aggregate(signal, (lambda x: "all") if cArgs.occurrence_threshold is None else lambda x: x["name"], cArgs.ext_size)
         if cArgs.plot_output is not None:
-            plot(forward, reverse, cArgs.font, cArgs.plot_output)
+            plot(signal["all"]["forward"], signal["all"]["reverse"], cArgs.font, cArgs.plot_output)
 
     print(json.dumps(signal))
 
