@@ -7,6 +7,7 @@ import json
 from argparse import ArgumentParser
 
 from ..footprint.footprint import footprint
+from ..regions.filter import FilteredRegions
 from ..plot.plot import plot
 
 def args():
@@ -18,6 +19,7 @@ def args():
     parser.add_argument("--font", type = str, help = "if set, path to a font to use during plotting", default = None)
     parser.add_argument("--ext-size", type = int, help = "expands regions by the given number of basepairs around their centers", default = 500)
     parser.add_argument("--aggregate", action = "store_true", help = "if set, outputs aggregate signal rather than profiles for each region", default = False)
+    parser.add_argument("--occurrence-threshold", type = float, help = "specificies that the given BED file contains FIMO occurrences which should be filtered at this q-value.", default = None)
     return parser.parse_args()
 
 def main():
@@ -38,7 +40,11 @@ def main():
             print("FATAL: Unable to load genome data for {assembly}.".format(assembly = cArgs.assembly), file = sys.stderr)
             return 1
 
-    signal = footprint(cArgs.bam, cArgs.bed, cArgs.assembly)
+    if cArgs.occurrence_threshold is None:
+        signal = footprint(cArgs.bam, cArgs.bed, cArgs.assembly)
+    else:
+        with FilteredRegions(cArgs.bed, cArgs.occurrence_threshold) as b:
+            signal = footprint(cArgs.bam, b.name, cArgs.assembly)
 
     if cArgs.aggregate or cArgs.plot_output is not None:
 

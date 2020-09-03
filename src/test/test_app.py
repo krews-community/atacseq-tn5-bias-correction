@@ -66,3 +66,21 @@ class TestApp(unittest.TestCase):
                 """.format(inputs = INPUTS, d = d, g = g)) != 0:
                     raise Exception("unable to run tests")
                 self.assertFileExists("{d}/test.svg".format(d = d))
+
+    def test_occurrences(self):
+
+        with tempfile.TemporaryDirectory() as g:
+
+            if os.system("tar zfx {GENOME} --directory {g}".format(GENOME = GENOME, g = g)) != 0:
+                raise Exception("unable to extract required genome files")
+
+            with tempfile.TemporaryDirectory() as d:
+                if os.system("""
+                    docker run --volume {inputs} --volume {g}:/root/rgtdata/hg38-chrM test python3 -m app.main \
+                        --bed /input/test.occ.bed --bam /input/test.bam --assembly hg38-chrM --occurrence-threshold 1e-5 > {d}/test.json
+                """.format(inputs = INPUTS, d = d, g = g)) != 0:
+                    raise Exception("unable to run tests")
+                self.assertFileExists("{d}/test.json".format(d = d))
+                with open("{d}/test.json".format(d = d), 'r') as f:
+                    j = json.load(f)
+                    self.assertEqual(len(j), 3)
