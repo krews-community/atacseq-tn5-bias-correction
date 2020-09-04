@@ -27,15 +27,26 @@ def regionDict(k, forward, reverse):
         "name": name
     }
 
-def footprint(bam: str, bed: str, assembly: str = "hg38", w: int = 500):
+def footprint(bam: str, bed: str, assembly: str = "hg38", w: int = 500, dnase: bool = False, bias_type = "SH"):
 
     # load HMM and bias parameters for ATAC-seq
     g = GenomeData(organism = assembly)
     hmm_data = HmmData()
-    hmm_file = hmm_data.get_default_hmm_atac_paired()
-    table_F = hmm_data.get_default_bias_table_F_ATAC()
-    table_R = hmm_data.get_default_bias_table_R_ATAC()
-    bias_table = BiasTable().load_table(table_file_name_F = table_F, table_file_name_R = table_R)
+    if dnase:
+        hmm_file = hmm_data.get_default_hmm_dnase_bc()
+        if bias_type == 'SH':
+            table_F = hmm_data.get_default_bias_table_F_SH()
+            table_R = hmm_data.get_default_bias_table_R_SH()
+            bias_table = BiasTable().load_table(table_file_name_F = table_F, table_file_name_R = table_R)
+        elif bias_type == 'DH':
+            table_F = hmm_data.get_default_bias_table_F_DH()
+            table_R = hmm_data.get_default_bias_table_R_DH()
+            bias_table = BiasTable().load_table(table_file_name_F = table_F, table_file_name_R = table_R)
+    else:
+        hmm_file = hmm_data.get_default_hmm_atac_paired()
+        table_F = hmm_data.get_default_bias_table_F_ATAC()
+        table_R = hmm_data.get_default_bias_table_R_ATAC()
+        bias_table = BiasTable().load_table(table_file_name_F = table_F, table_file_name_R = table_R)
 
     # load reads from BAM
     reads_file = GenomicSignal(bam)

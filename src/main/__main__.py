@@ -20,6 +20,11 @@ def args():
     parser.add_argument("--ext-size", type = int, help = "expands regions by the given number of basepairs around their centers", default = 500)
     parser.add_argument("--aggregate", action = "store_true", help = "if set, outputs aggregate signal rather than profiles for each region", default = False)
     parser.add_argument("--occurrence-threshold", type = float, help = "specificies that the given BED file contains FIMO occurrences which should be filtered at this q-value.", default = None)
+    parser.add_argument("--dnase", action = "store_true", default = False, help = "if set, specifies that bias correction should be for DNase I")
+    parser.add_argument("--bias-type", dest="bias_type", type=str, metavar="STRING", default="SH",
+                        help=("Type of protocol used to generate the DNase-seq. "
+                              "Available options are: 'SH' (DNase-seq single-hit protocol), 'DH' "
+                              "(DNase-seq double-hit protocol). DEFAULT: SH"))
     return parser.parse_args()
 
 def aggregate(signal, key = lambda x: "all", ext_size = 500):
@@ -58,10 +63,10 @@ def main():
             return 1
 
     if cArgs.occurrence_threshold is None:
-        signal = footprint(cArgs.bam, cArgs.bed, cArgs.assembly)
+        signal = footprint(cArgs.bam, cArgs.bed, cArgs.assembly, cArgs.ext_size, cArgs.dnase, cArgs.bias_type)
     else:
         with FilteredRegions(cArgs.bed, cArgs.occurrence_threshold) as b:
-            signal = footprint(cArgs.bam, b.name, cArgs.assembly)
+            signal = footprint(cArgs.bam, b.name, cArgs.assembly, cArgs.ext_size, cArgs.dnase, cArgs.bias_type)
 
     if cArgs.aggregate or cArgs.plot_output is not None:
         signal = aggregate(signal, (lambda x: "all") if cArgs.occurrence_threshold is None else lambda x: x["name"], cArgs.ext_size)
