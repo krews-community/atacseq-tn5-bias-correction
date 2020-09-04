@@ -43,13 +43,13 @@ def main():
 
     cArgs = args()
 
-    if not os.path.exists("/root/rgtdata/{assembly}/genome_{assembly}.fa".format(assembly = cArgs.assembly)):
+    if not os.path.exists("/rgtdata/{assembly}/genome_{assembly}.fa".format(assembly = cArgs.assembly)):
         print(
             "WARNING: genomic data is not present for {assembly}. We will attempt to download it.".format(assembly = cArgs.assembly),
             file = sys.stderr
         )
         print(
-            "If you are running many jobs, they might run faster if you mount the appropriate data at /root/rgtdata/{assembly}.".format(assembly = cArgs.assembly),
+            "If you are running many jobs, they might run faster if you mount the appropriate data at /rgtdata/{assembly}.".format(assembly = cArgs.assembly),
             file = sys.stderr
         )
         result = os.system("python3 /reg-gen/data/setupGenomicData.py --{assembly}".format(assembly = cArgs.assembly))
