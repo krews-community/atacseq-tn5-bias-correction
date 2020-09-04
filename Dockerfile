@@ -1,6 +1,8 @@
 FROM ubuntu:latest
 
 ENV PYTHONPATH /reg-gen
+ENV TZ=America/New_York
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get update && apt-get -y install zlib1g-dev libcurl4-openssl-dev build-essential wget git python3 python3-pip samtools && \
     git clone https://github.com/CostaLab/reg-gen.git && \
