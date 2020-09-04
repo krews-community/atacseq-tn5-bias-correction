@@ -14,7 +14,9 @@ RUN apt-get update && apt-get -y install zlib1g-dev libcurl4-openssl-dev build-e
     rm -rf /var/lib/apt/lists/*
 
 COPY setup.py /reg-gen/setup.py
-RUN cd /reg-gen && python3 setup.py install && cd / && \
-    mv /root/rgtdata /rgtdata && chmod 666 /rgtdata && rm -rf /tmp/*
+RUN chmod -R 666 /reg-gen && cd /reg-gen && python3 setup.py install && cd / && \
+    mv /root/rgtdata /rgtdata && rm -rf /tmp/*
 COPY data.config /rgtdata
+RUN chmod -R 666 /rgtdata
 COPY src/ /app
+RUN chmod -R 666 /app
