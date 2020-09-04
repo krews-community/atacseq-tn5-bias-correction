@@ -95,7 +95,7 @@ tools_dictionary = {
     "motifanalysis": (
         "rgt-motifanalysis",
         "rgt.motifanalysis.Main:main",
-        ["Biopython>=1.64", "fisher>=0.1.5"],
+        ["Biopython>=1.64"],
         []
     ),
     "hint": (
