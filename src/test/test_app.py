@@ -24,7 +24,7 @@ class TestApp(unittest.TestCase):
 
             with tempfile.TemporaryDirectory() as d:
                 if os.system("""
-                    docker run --volume {inputs} --volume {g}:/root/rgtdata/hg38-chrM test python3 -m app.main \
+                    docker run --volume {inputs} --volume {g}:/rgtdata/hg38-chrM test python3 -m app.main \
                         --bed /input/test.bed --bam /input/test.bam --assembly hg38-chrM > {d}/test.json
                 """.format(inputs = INPUTS, d = d, g = g)) != 0:
                     raise Exception("unable to run tests")
@@ -42,7 +42,7 @@ class TestApp(unittest.TestCase):
 
             with tempfile.TemporaryDirectory() as d:
                 if os.system("""
-                    docker run --volume {inputs} --volume {g}:/root/rgtdata/hg38-chrM test python3 -m app.main \
+                    docker run --volume {inputs} --volume {g}:/rgtdata/hg38-chrM test python3 -m app.main \
                         --bed /input/test.bed --bam /input/test.bam --assembly hg38-chrM --aggregate > {d}/test.json
                 """.format(inputs = INPUTS, d = d, g = g)) != 0:
                     raise Exception("unable to run tests")
@@ -61,7 +61,7 @@ class TestApp(unittest.TestCase):
 
             with tempfile.TemporaryDirectory() as d:
                 if os.system("""
-                    docker run --volume {inputs} --volume {g}:/root/rgtdata/hg38-chrM --volume {d}:/output test python3 -m app.main \
+                    docker run --volume {inputs} --volume {g}:/rgtdata/hg38-chrM --volume {d}:/output test python3 -m app.main \
                         --bed /input/test.bed --bam /input/test.bam --assembly hg38-chrM --plot-output /output/test.svg > /dev/null
                 """.format(inputs = INPUTS, d = d, g = g)) != 0:
                     raise Exception("unable to run tests")
@@ -76,7 +76,7 @@ class TestApp(unittest.TestCase):
 
             with tempfile.TemporaryDirectory() as d:
                 if os.system("""
-                    docker run --volume {inputs} --volume {g}:/root/rgtdata/hg38-chrM test python3 -m app.main \
+                    docker run --volume {inputs} --volume {g}:/rgtdata/hg38-chrM test python3 -m app.main \
                         --bed /input/test.occ.bed --bam /input/test.bam --assembly hg38-chrM --aggregate --occurrence-threshold 1e-5 > {d}/test.json
                 """.format(inputs = INPUTS, d = d, g = g)) != 0:
                     raise Exception("unable to run tests")
