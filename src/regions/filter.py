@@ -11,6 +11,7 @@ class FilteredRegions:
     def __enter__(self):
         self.tempfile = tempfile.NamedTemporaryFile('wt')
         with open(self.path, 'r') as f:
+            f.readline()
             for line in f:
                 if float(line.strip().split()[-1]) < self.threshold:
                     self.tempfile.write('\t'.join(line.strip().split()[1:4]) + '\t' + line.strip().split()[0] + '\n')
