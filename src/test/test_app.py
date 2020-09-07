@@ -147,3 +147,21 @@ class TestApp(unittest.TestCase):
                     self.assertEqual(len(j["ATTTCTCTCWGTGYA"]["reverse"]), 1000)
                     self.assertEqual(len(j["all"]["forward"]), 1000)
                     self.assertEqual(len(j["all"]["reverse"]), 1000)
+
+    def test_occurrences_1F(self):
+
+        with tempfile.TemporaryDirectory() as g:
+
+            if os.system("tar zfx {GENOME} --directory {g}".format(GENOME = GENOME, g = g)) != 0:
+                raise Exception("unable to extract required genome files")
+
+            with tempfile.TemporaryDirectory() as d:
+                if os.system("""
+                    docker run --env RGTDATA=/rgtdata --volume {inputs} --volume {g}:/rgtdata/hg38-chrM test python3 -m app.main \
+                        --bed /input/test.occ.bed --bam /input/test.bam --assembly hg38-chrM --occurrence-threshold 1.0 > {d}/test.json
+                """.format(inputs = INPUTS, d = d, g = g)) != 0:
+                    raise Exception("unable to run tests")
+                self.assertFileExists("{d}/test.json".format(d = d))
+                with open("{d}/test.json".format(d = d), 'r') as f:
+                    j = json.load(f)
+                    self.assertEqual(len(j), 9)
