@@ -12,19 +12,20 @@ from rgt.HINT.biasTable import BiasTable
 
 from .constants import *
 
-def expandRegion(chromosome, start, end, name = None, w = 500):
+def expandRegion(chromosome, start, end, name = None, w = 500, strand = '.'):
     m = int((int(start) + int(end)) / 2)
-    return chromosome, m - w, m + w, name
+    return chromosome, m - w, m + w, name, strand
 
 def regionDict(k, forward, reverse):
-    chromosome, start, end, name = k
+    chromosome, start, end, name, strand = k
     return {
         "chromosome": chromosome,
         "start": start,
         "end": end,
         "forward": forward,
         "reverse": reverse,
-        "name": name
+        "name": name,
+        "strand": strand
     }
 
 def footprint(bam: str, bed: str, assembly: str = "hg38", w: int = 500, dnase: bool = False, bias_type = "SH"):
@@ -58,18 +59,24 @@ def footprint(bam: str, bed: str, assembly: str = "hg38", w: int = 500, dnase: b
 
     # load and expand regions
     with open(bed, 'r') as f:
-        regions = [ expandRegion(*tuple(line.strip().split()[:3]), line.strip().split()[3] if len(line.strip().split()) >= 4 else None, w) for line in f ]
+        regions = [ expandRegion(
+            *tuple(line.strip().split()[:3]), line.strip().split()[3] if len(line.strip().split()) >= 4 else None, w,
+            line.strip().split()[4] if len(line.strip().split()) >= 5 else '.'
+        ) for line in f ]
     
     # load signal
     forward = []; reverse = []
     for i, x in enumerate(regions):
-        chromosome, start, end, _ = x
+        chromosome, start, end, _, strand = x
         atac_norm_f, atac_slope_f, atac_norm_r, atac_slope_r = reads_file.get_signal_atac(
             chromosome, start, end, 0, 0, FORWARD_SHIFT, REVERSE_SHIFT,
             50, 98, 98, bias_table, g.get_genome()
         )
-        forward.append(atac_norm_f)
-        reverse.append(atac_norm_r)
+        if strand == '-':
+            atac_norm_f.reverse()
+            atac_norm_r.reverse()
+        forward.append(atac_norm_f if strand != '-' else atac_norm_r)
+        reverse.append(atac_norm_r if strand != '-' else atac_norm_f)
         if i % 500 == 0: print("INFO: aggregating region %d of %d" % (i, len(regions)), file = sys.stderr)
 
     return [ regionDict(regions[i], forward[i], reverse[i]) for i in range(len(regions)) ]

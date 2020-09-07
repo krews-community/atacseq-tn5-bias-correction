@@ -20,7 +20,7 @@ class FilteredRegions:
             f.readline()
             for line in f:
                 if float(line.strip().split()[-1]) < self.threshold and line.strip().split()[1] in self.chromosomes:
-                    self.tempfile.write('\t'.join(line.strip().split()[1:4]) + '\t' + line.strip().split()[0] + '\n')
+                    self.tempfile.write('\t'.join(line.strip().split()[1:4]) + '\t' + line.strip().split()[0] + '\t' + line.strip().split()[4] + '\n')
         self.tempfile.flush()
         return self.tempfile
     
