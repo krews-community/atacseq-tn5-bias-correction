@@ -22,6 +22,7 @@ def args():
     parser.add_argument("--aggregate", action = "store_true", help = "if set, outputs aggregate signal rather than profiles for each region", default = False)
     parser.add_argument("--occurrence-threshold", type = float, help = "specificies that the given BED file contains FIMO occurrences which should be filtered at this q-value.", default = None)
     parser.add_argument("--dnase", action = "store_true", default = False, help = "if set, specifies that bias correction should be for DNase I")
+    parser.add_argument("--output-file", type = str, default = None, help = "path to write output; default is stdout")
     parser.add_argument("--bias-type", dest="bias_type", type=str, metavar="STRING", default="SH",
                         help=("Type of protocol used to generate the DNase-seq. "
                               "Available options are: 'SH' (DNase-seq single-hit protocol), 'DH' "
@@ -76,7 +77,11 @@ def main():
         if cArgs.plot_output is not None:
             plot(signal["all"]["forward"], signal["all"]["reverse"], cArgs.font, cArgs.plot_output)
 
-    print(json.dumps(signal))
+    if cArgs.output_file is None:
+        print(json.dumps(signal))
+    else:
+        with open(cArgs.output_file, 'w') as o:
+            o.write(json.dumps(signal) + '\n')
 
     return 0
 
