@@ -5,6 +5,7 @@ import sys
 import json
 
 from argparse import ArgumentParser
+from rgt.Util import GenomeData
 
 from ..footprint.footprint import footprint
 from ..regions.filter import FilteredRegions
@@ -66,7 +67,8 @@ def main():
     if cArgs.occurrence_threshold is None:
         signal = footprint(cArgs.bam, cArgs.bed, cArgs.assembly, cArgs.ext_size, cArgs.dnase, cArgs.bias_type)
     else:
-        with FilteredRegions(cArgs.bed, cArgs.occurrence_threshold) as b:
+        g = GenomeData(organism = cArgs.assembly)
+        with FilteredRegions(cArgs.bed, cArgs.occurrence_threshold, g.get_genome(), g.get_chromosome_sizes()) as b:
             signal = footprint(cArgs.bam, b.name, cArgs.assembly, cArgs.ext_size, cArgs.dnase, cArgs.bias_type)
 
     if cArgs.aggregate or cArgs.plot_output is not None:
