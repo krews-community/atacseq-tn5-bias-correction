@@ -70,5 +70,6 @@ def footprint(bam: str, bed: str, assembly: str = "hg38", w: int = 500, dnase: b
         )
         forward.append(atac_norm_f)
         reverse.append(atac_norm_r)
+        if i % 500 == 0: print("INFO: aggregating region %d of %d" % (i, len(regions)), file = sys.stderr)
 
     return [ regionDict(regions[i], forward[i], reverse[i]) for i in range(len(regions)) ]
