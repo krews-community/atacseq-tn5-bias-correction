@@ -2,6 +2,7 @@
 
 import sys
 import argparse
+import math
 
 from typing import List, Tuple
 from pysam import Fastafile, Samfile
@@ -13,7 +14,7 @@ from rgt.HINT.biasTable import BiasTable
 from .constants import *
 
 def expandRegion(chromosome, start, end, name = None, w = 500, strand = '.'):
-    m = int((int(start) + int(end)) / 2)
+    m = (math.ceil if strand == '-' else math.floor)((int(start) + int(end)) / 2)
     return chromosome, m - w, m + w, name, strand
 
 def regionDict(k, forward, reverse):
