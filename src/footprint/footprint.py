@@ -67,12 +67,13 @@ def footprint(bam: str, bed: str, assembly: str = "hg38", w: int = 500, dnase: b
     
     # load signal
     forward = []; reverse = []; failed = 0
+    get_reads = reads_file.get_signal_atac if not dnase else reads_file.get_signal
     for i, x in enumerate(regions):
         try:
             chromosome, start, end, _, strand = x
-            atac_norm_f, atac_slope_f, atac_norm_r, atac_slope_r = reads_file.get_signal_atac(
-                chromosome, start, end, 0, 0, FORWARD_SHIFT, REVERSE_SHIFT,
-                50, 98, 98, bias_table, g.get_genome()
+            atac_norm_f, atac_slope_f, atac_norm_r, atac_slope_r = get_reads(
+                chromosome, start, end, 0, 0, FORWARD_SHIFT if not dnase else 0, REVERSE_SHIFT if not dnase else 0,
+                1000 if dnase else 150, 98, 98, bias_table, g.get_genome()
             )
             if strand == '-':
                 atac_norm_f.reverse()
