@@ -23,7 +23,8 @@ def args():
     parser.add_argument("--occurrence-threshold", type = float, help = "specificies that the given BED file contains FIMO occurrences which should be filtered at this q-value.", default = None)
     parser.add_argument("--dnase", action = "store_true", default = False, help = "if set, specifies that bias correction should be for DNase I")
     parser.add_argument("--output-file", type = str, default = None, help = "path to write output; default is stdout")
-    parser.add_argument("--bias-type", dest="bias_type", type=str, metavar="STRING", default="SH",
+    parser.add_argument("--output-as-tsv", action = "store_true", help = "if specified, outputs values in TSV rather than JSON format; only applies if --aggregate is set", default = False)
+    parser.add_argument("--bias-type", dest="bias_type", type = str, metavar = "STRING", default = "SH",
                         help=("Type of protocol used to generate the DNase-seq. "
                               "Available options are: 'SH' (DNase-seq single-hit protocol), 'DH' "
                               "(DNase-seq double-hit protocol). DEFAULT: SH"))
@@ -78,10 +79,20 @@ def main():
             plot(signal["all"]["forward"], signal["all"]["reverse"], cArgs.font, cArgs.plot_output)
 
     if cArgs.output_file is None:
-        print(json.dumps(signal))
+        if not cArgs.output_as_tsv or not cArgs.aggregate:
+            print(json.dumps(signal))
+        else:
+            for k, v in signal.items():
+                if k != "all":
+                    print("%s\t%s\t%s" % (k, ','.join([ str(x) for x in v["forward"] ]), ','.join([ str(x) for x in v["reverse"] ])))
     else:
         with open(cArgs.output_file, 'w') as o:
-            o.write(json.dumps(signal) + '\n')
+            if not cArgs.output_as_tsv or not cArgs.aggregate:
+                o.write(json.dumps(signal) + '\n')
+            else:
+                for k, v in signal.items():
+                    if k != "all":
+                        o.write("%s\t%s\t%s\n" % (k, ','.join([ str(x) for x in v["forward"] ]), ','.join([ str(x) for x in v["reverse"] ])))
 
     return 0
 

@@ -183,3 +183,23 @@ class TestApp(unittest.TestCase):
                 with open("{d}/test.json".format(d = d), 'r') as f:
                     j = json.load(f)
                     self.assertEqual(len(j), 1)
+
+    def test_occurrences_extras_tsv(self):
+
+        with tempfile.TemporaryDirectory() as g:
+
+            if os.system("tar zfx {GENOME} --directory {g}".format(GENOME = GENOME, g = g)) != 0:
+                raise Exception("unable to extract required genome files")
+
+            with tempfile.TemporaryDirectory() as d:
+                if os.system("""
+                    docker run --env RGTDATA=/rgtdata --volume {inputs} --volume {g}:/rgtdata/hg38-chrM test python3 -m app.main \
+                        --bed /input/test.occ.extras.bed --bam /input/test.bam --assembly hg38-chrM --occurrence-threshold 1.0 \
+                        --output-as-tsv --aggregate > {d}/test.tsv
+                """.format(inputs = INPUTS, d = d, g = g)) != 0:
+                    raise Exception("unable to run tests")
+                self.assertFileExists("{d}/test.tsv".format(d = d))
+                with open("{d}/test.tsv".format(d = d), 'r') as f:
+                    self.assertEqual(len([ x for x in f ]), 1)
+                with open("{d}/test.tsv".format(d = d), 'r') as f:
+                    self.assertEqual(len(f.readline().strip().split()), 3)               
