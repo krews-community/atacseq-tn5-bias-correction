@@ -66,18 +66,22 @@ def footprint(bam: str, bed: str, assembly: str = "hg38", w: int = 500, dnase: b
         ) for line in f ]
     
     # load signal
-    forward = []; reverse = []
+    forward = []; reverse = []; failed = 0
     for i, x in enumerate(regions):
-        chromosome, start, end, _, strand = x
-        atac_norm_f, atac_slope_f, atac_norm_r, atac_slope_r = reads_file.get_signal_atac(
-            chromosome, start, end, 0, 0, FORWARD_SHIFT, REVERSE_SHIFT,
-            50, 98, 98, bias_table, g.get_genome()
-        )
-        if strand == '-':
-            atac_norm_f.reverse()
-            atac_norm_r.reverse()
-        forward.append(atac_norm_f if strand != '-' else atac_norm_r)
-        reverse.append(atac_norm_r if strand != '-' else atac_norm_f)
-        if i % 500 == 0: print("INFO: aggregating region %d of %d" % (i, len(regions)), file = sys.stderr)
+        try:
+            chromosome, start, end, _, strand = x
+            atac_norm_f, atac_slope_f, atac_norm_r, atac_slope_r = reads_file.get_signal_atac(
+                chromosome, start, end, 0, 0, FORWARD_SHIFT, REVERSE_SHIFT,
+                50, 98, 98, bias_table, g.get_genome()
+            )
+            if strand == '-':
+                atac_norm_f.reverse()
+                atac_norm_r.reverse()
+            forward.append(atac_norm_f if strand != '-' else atac_norm_r)
+            reverse.append(atac_norm_r if strand != '-' else atac_norm_f)
+            if i % 500 == 0: print("INFO: aggregating region %d of %d" % (i, len(regions)), file = sys.stderr)
+        except:
+            failed += 1
+    print("WARNING: failed to generate bias-corrected signal profiles for %d regions" % failed)
 
     return [ regionDict(regions[i], forward[i], reverse[i]) for i in range(len(regions)) ]
