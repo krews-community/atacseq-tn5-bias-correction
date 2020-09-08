@@ -82,6 +82,7 @@ def footprint(bam: str, bed: str, assembly: str = "hg38", w: int = 500, dnase: b
             if i % 500 == 0: print("INFO: aggregating region %d of %d" % (i, len(regions)), file = sys.stderr)
         except:
             failed += 1
-    print("WARNING: failed to generate bias-corrected signal profiles for %d regions" % failed)
+    if failed > 0:
+        print("WARNING: failed to generate bias-corrected signal profiles for %d regions" % failed, file = sys.stderr)
 
     return [ regionDict(regions[i], forward[i], reverse[i]) for i in range(len(regions)) ]
