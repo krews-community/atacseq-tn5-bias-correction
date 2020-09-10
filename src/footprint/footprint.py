@@ -75,6 +75,8 @@ def footprint(bam: str, bed: str, assembly: str = "hg38", w: int = 500, dnase: b
                 chromosome, start, end, 0, 0, FORWARD_SHIFT if not dnase else 0, REVERSE_SHIFT if not dnase else 0,
                 1000 if dnase else 150, 98, 98, bias_table, g.get_genome()
             )
+            atac_norm_f = [ float(x) for x in atac_norm_f ]
+            atac_norm_r = [ float(x) for x in atac_norm_r ]
             if strand == '-':
                 atac_norm_f.reverse()
                 atac_norm_r.reverse()
